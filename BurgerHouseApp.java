@@ -138,7 +138,7 @@ public double applyDiscount(double percent) {
 }//end applyDiscount
 
 public void displayCustomerInfo() {
-    System.out.println("Customer ID: " + custumerId+"Customer Name: " + customerName+"Phone: " + phone+"VIP Status: " + (isVIP ? "Yes" : "No"));
+    System.out.println("Customer ID: " + custumerId+"\nCustomer Name: " + customerName+"\nPhone: " + phone+"\nVIP Status: " + (isVIP ? "Yes" : "No"));
 
 }//end displayCustomerInfo
 
@@ -287,7 +287,7 @@ public void displayMenu() {
         System.out.println("-------------------");
     }
 }//end displayMenu
-}//end Class Restaurant
+}//end Class Restaurantimport java.util.Scanner;import java.util.Scanner;
 
 public class BurgerHouseApp {
 
@@ -295,65 +295,49 @@ public class BurgerHouseApp {
 
         Scanner input = new Scanner(System.in);
 
-        // Create restaurant
         Restaurant restaurant = new Restaurant("Burger House", 20);
 
-        // Create food items
-        FoodItem item1 =
-                new MainDish(1, "Classic Burger", 25.0, "Burger");
+        // Add items to the restaurant menu
+        restaurant.addMenuItem(
+                new MainDish(1, "Classic Burger", 25, "Beef"));
+        restaurant.addMenuItem(
+                new MainDish(2, "Chicken Burger", 22, "Chicken"));
+        restaurant.addMenuItem(
+                new SpecialMainDish(3, "Special Burger", 30,
+                        "Beef", "Extra Cheese", 5));
+        restaurant.addMenuItem(
+                new Dessert(4, "Chocolate Cake", 15, false));
+        restaurant.addMenuItem(
+                new Drink(5, "Orange Juice", 8, "Medium"));
 
-        FoodItem item2 =
-                new MainDish(2, "Chicken Burger", 22.0, "Chicken");
+        // Get customer information
+        System.out.println("===== Welcome to Burger House =====");
 
-        FoodItem item3 =
-                new SpecialMainDish(3, "Special Burger", 30.0,
-                        "Burger", "Extra Cheese", 5.0);
+        String customerName = readValidName(input);
+        String phone = readValidPhone(input);
+        boolean isVIP = readYesNo(input);
 
-        FoodItem item4 =
-                new Dessert(4, "Chocolate Cake", 15.0, true);
-
-        FoodItem item5 =
-                new Drink(5, "Orange Juice", 8.0, "Medium");
-
-        // Add food items to restaurant
-        restaurant.addMenuItem(item1);
-        restaurant.addMenuItem(item2);
-        restaurant.addMenuItem(item3);
-        restaurant.addMenuItem(item4);
-        restaurant.addMenuItem(item5);
-
-        // Create customer
         Customer customer =
-                new Customer(101, "Customer", "0500000000", false);
+                new Customer(101, customerName, phone, isVIP);
 
         restaurant.registerCustomer(customer);
 
-        // Create order
         Order order = restaurant.createOrder(customer);
+        boolean isPaid = false;
 
-        int choice = 0;
-
-        System.out.println("================================");
-        System.out.println("   WELCOME TO BURGER HOUSE");
-        System.out.println("================================");
+        int choice;
 
         do {
-            System.out.println("\n========== MAIN MENU ==========");
-            System.out.println("1. Display Restaurant Menu");
-            System.out.println("2. Search for Food Item");
+            System.out.println("\n===== Main Menu =====");
+            System.out.println("1. Display Menu");
+            System.out.println("2. Search for an Item");
             System.out.println("3. Add Item to Order");
             System.out.println("4. Remove Item from Order");
-            System.out.println("5. Display Order and Total");
+            System.out.println("5. View Order and Checkout");
             System.out.println("6. Exit");
-            System.out.print("Enter your choice: ");
+            System.out.print("Choose an option: ");
 
-            while (!input.hasNextInt()) {
-                System.out.println("Please enter a valid number.");
-                input.next();
-                System.out.print("Enter your choice: ");
-            }
-
-            choice = input.nextInt();
+            choice = readInt(input);
 
             switch (choice) {
 
@@ -362,72 +346,125 @@ public class BurgerHouseApp {
                     break;
 
                 case 2:
-                    System.out.print("Enter food item ID: ");
+                    System.out.print("Enter item ID to search: ");
+                    int searchId = readInt(input);
 
-                    if (input.hasNextInt()) {
-                        int searchId = input.nextInt();
+                    FoodItem foundItem =
+                            restaurant.searchMenuItem(searchId);
 
-                        FoodItem found =
-                                restaurant.searchMenuItem(searchId);
-
-                        if (found != null) {
-                            System.out.println("Item found:");
-                            found.display();
-
-                            System.out.printf(
-                                    "Final Price: %.2f SAR%n",
-                                    found.calculateFinalPrice());
-                        }
-                    } else {
-                        System.out.println("Invalid ID.");
-                        input.next();
+                    if (foundItem != null) {
+                        foundItem.display();
+                        System.out.printf("Final Price: %.2f SAR%n",
+                                foundItem.calculateFinalPrice());
                     }
                     break;
 
                 case 3:
-                    System.out.print("Enter food item ID to add: ");
+                    if (isPaid) {
+                        System.out.println(
+                                "This order has already been paid.");
+                        break;
+                    }
 
-                    if (input.hasNextInt()) {
-                        int addId = input.nextInt();
+                    System.out.print("Enter item ID to add: ");
+                    int addId = readInt(input);
 
-                        FoodItem selected =
-                                restaurant.searchMenuItem(addId);
+                    FoodItem itemToAdd =
+                            restaurant.searchMenuItem(addId);
 
-                        if (selected != null) {
-                            if (order.addItem(selected)) {
-                                System.out.println(
-                                        "Item added successfully.");
-                            }
+                    if (itemToAdd != null) {
+                        if (order.addItem(itemToAdd)) {
+                            System.out.println(
+                                    "Item added successfully!");
                         }
-                    } else {
-                        System.out.println("Invalid ID.");
-                        input.next();
                     }
                     break;
 
                 case 4:
-                    System.out.print("Enter food item ID to remove: ");
+                    if (isPaid) {
+                        System.out.println(
+                                "This order has already been paid.");
+                        break;
+                    }
 
-                    if (input.hasNextInt()) {
-                        int removeId = input.nextInt();
+                    System.out.print("Enter item ID to remove: ");
+                    int removeId = readInt(input);
 
-                        if (order.removeItem(removeId)) {
-                            System.out.println(
-                                    "Item removed successfully.");
-                        }
-                    } else {
-                        System.out.println("Invalid ID.");
-                        input.next();
+                    if (order.removeItem(removeId)) {
+                        System.out.println(
+                                "Item removed successfully!");
                     }
                     break;
 
                 case 5:
+                    if (isPaid) {
+                        System.out.println(
+                                "This order has already been paid.");
+                        break;
+                    }
+
+                    double subtotal = order.calculateTotalPrice(0);
+
+                    if (subtotal == 0) {
+                        System.out.println(
+                                "Your order is empty. Add an item first.");
+                        break;
+                    }
+
+                    System.out.println("\n===== Order Summary =====");
                     order.displayOrderDetails();
+
+                    double discountPercent =
+                            customer.applyDiscount(0);
+                    double discountAmount =
+                            subtotal * discountPercent / 100.0;
+                    double finalTotal = subtotal - discountAmount;
+
+                    System.out.printf("Subtotal: %.2f SAR%n", subtotal);
+
+                    if (isVIP) {
+                        System.out.printf(
+                                "VIP Discount (%.0f%%): -%.2f SAR%n",
+                                discountPercent, discountAmount);
+                    } else {
+                        System.out.println("VIP Discount: 0.00 SAR");
+                    }
+
+                    System.out.printf(
+                            "Final Total: %.2f SAR%n", finalTotal);
+
+                    System.out.println("\n===== Checkout =====");
+                    System.out.println("1. Pay Now");
+                    System.out.println("2. Back to Main Menu");
+                    System.out.print("Choose an option: ");
+
+                    int paymentChoice = readInt(input);
+
+                    if (paymentChoice == 1) {
+                        System.out.println("\nProcessing payment...");
+
+                        isPaid = true;
+
+                        System.out.println(
+                                "Payment completed successfully!");
+                        System.out.printf(
+                                "Amount Paid: %.2f SAR%n", finalTotal);
+                        System.out.println(
+                                "Thank you for ordering from Burger House!");
+                        System.out.println(
+                                "Returning to the main menu...");
+
+                    } else if (paymentChoice == 2) {
+                        System.out.println(
+                                "Returning to the main menu...");
+                    } else {
+                        System.out.println(
+                                "Invalid choice. Returning to the main menu.");
+                    }
                     break;
 
                 case 6:
-                    System.out.println(
-                            "Thank you for visiting Burger House!");
+                    System.out.println("Thank you for visiting us!");
                     break;
 
                 default:
@@ -439,5 +476,70 @@ public class BurgerHouseApp {
 
         input.close();
     }
-}
 
+    // Validate name: letters and spaces only
+    public static String readValidName(Scanner input) {
+        String name;
+
+        while (true) {
+            System.out.print("Enter your name: ");
+            name = input.nextLine().trim();
+
+            if (!name.isEmpty() &&
+                    name.matches("[\\p{L} ]+")) {
+                return name;
+            }
+
+            System.out.println(
+                    "Invalid name! Use letters only.");
+        }
+    }
+
+    // Validate phone number: digits only
+    public static String readValidPhone(Scanner input) {
+        String phone;
+
+        while (true) {
+            System.out.print("Enter your phone number: ");
+            phone = input.nextLine().trim();
+
+            if (phone.matches("[0-9]+")) {
+                return phone;
+            }
+
+            System.out.println(
+                    "Invalid phone number! Enter digits only.");
+        }
+    }
+
+    // Accept yes/no regardless of letter case
+    public static boolean readYesNo(Scanner input) {
+        while (true) {
+            System.out.print("Are you a VIP customer? (yes/no): ");
+            String answer = input.nextLine().trim();
+
+            if (answer.equalsIgnoreCase("yes")) {
+                return true;
+            }
+
+            if (answer.equalsIgnoreCase("no")) {
+                return false;
+            }
+
+            System.out.println(
+                    "Invalid input! Please enter yes or no.");
+        }
+    }
+
+    // Read an integer safely
+    public static int readInt(Scanner input) {
+        while (!input.hasNextInt()) {
+            System.out.print("Please enter a valid number: ");
+            input.nextLine();
+        }
+
+        int number = input.nextInt();
+        input.nextLine();
+        return number;
+    }
+}
