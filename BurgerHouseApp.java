@@ -29,7 +29,7 @@ public int getId() {
 
 }//end class FoodItem
 
-class MainDish extends FoodItem{
+class MainDish extends FoodItem implements Discountable{
 
     private String Category;
 
@@ -53,6 +53,13 @@ public void display(){
 System.out.println("ID: "+id+"\nName: "+name+"\nPrice: "+price+"\nCategory: "+Category);
 
 }//end display MainDish
+
+@Override 
+public double applyDiscount(double percent) {
+    
+    return price - (price * percent / 100.0);
+
+}//end applyDiscount MainDish
 
 }//end Class MainDish
 
@@ -287,7 +294,7 @@ public void displayMenu() {
         System.out.println("-------------------");
     }
 }//end displayMenu
-}//end Class Restaurantimport java.util.Scanner;import java.util.Scanner;
+}//end Class Restaurant
 
 public class BurgerHouseApp {
 
